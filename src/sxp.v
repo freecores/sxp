@@ -41,11 +41,14 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: sxp.v,v 1.4 2001-11-09 00:45:59 samg Exp $  
+// $Id: sxp.v,v 1.5 2001-12-05 05:58:10 samg Exp $  
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.4  2001/11/09 00:45:59  samg
+// integrated common rams into processor
+//
 // Revision 1.3  2001/11/06 20:15:28  samg
 // Used common header
 //
@@ -253,6 +256,7 @@ wire jal_req;
 wire safe_switch;
 wire nop_detect;
 wire int_jal_req;
+
 
 // Processor Interupt controller
 int_cont i_int_cont(
@@ -672,12 +676,8 @@ always @(wb_cfg_4 or ya_4 or cvnz_a_4 or yb_4 or cvnz_b_4 or spqa_4 or ext_cvnz_
   end
 
 // Destination handling only write enable is instruction is valid
-always @(dest_cfg_4 or inst_vld_4 or cond_jump_4 or yb_4[0] or jz_4 or set_pc)
+always @(dest_cfg_4 or inst_vld_4 or cond_jump_4 or yb_4[0] or jz_4 or set_pc or jal_4)
   begin
-    wec = 1'b 0;		// Write enable port C (reg file)
-    set_pc_4 = 1'b 0;		// set new PC val
-    spw_we = 1'b 0; 		// scratch pad write enable
-    ext_we = 1'b 0;		// write enable for ext bus 
     if (inst_vld_4)
       case (dest_cfg_4)
         2'b 00 : wec = 1'b 1; 

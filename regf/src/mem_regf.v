@@ -2,7 +2,7 @@
 ////                                                              ////
 //// mem_regf                                                     ////
 ////                                                              ////
-//// This file is part of the YOUR PROJECT NAME opencores effort. ////
+//// This file is part of the SXP opencores effort.               ////
 //// <http://www.opencores.org/cores/sxp/>                        ////
 ////                                                              ////
 //// Module Description:                                          ////
@@ -40,11 +40,14 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: mem_regf.v,v 1.2 2001-11-08 23:53:40 samg Exp $ 
+// $Id: mem_regf.v,v 1.3 2001-11-09 00:00:04 samg Exp $ 
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2001/11/08 23:53:40  samg
+// integrated common memories
+//
 //
 
 module mem_regf (

@@ -1,9 +1,51 @@
-/*
- Scoreboarding module for reg file
- SXP Processor
- Sam Gladstone
-
-*/
+//////////////////////////////////////////////////////////////////////
+////                                                              ////
+//// regf_status                                                  ////
+////                                                              ////
+//// This file is part of the SXP opencores effort.               ////
+//// <http://www.opencores.org/cores/sxp/>                        ////
+////                                                              ////
+//// Module Description:                                          ////
+//// Scoreboarding module for reg file                            ////
+////                                                              ////
+//// To Do:                                                       ////
+////                                                              ////
+//// Author(s):                                                   ////
+//// - Sam Gladstone                                              ////
+////                                                              ////
+//////////////////////////////////////////////////////////////////////
+////                                                              ////
+//// Copyright (C) 2001 Sam Gladstone and OPENCORES.ORG           ////
+////                                                              ////
+//// This source file may be used and distributed without         ////
+//// restriction provided that this copyright statement is not    ////
+//// removed from the file and that any derivative work contains  ////
+//// the original copyright notice and the associated disclaimer. ////
+////                                                              ////
+//// This source file is free software; you can redistribute it   ////
+//// and/or modify it under the terms of the GNU Lesser General   ////
+//// Public License as published by the Free Software Foundation; ////
+//// either version 2.1 of the License, or (at your option) any   ////
+//// later version.                                               ////
+////                                                              ////
+//// This source is distributed in the hope that it will be       ////
+//// useful, but WITHOUT ANY WARRANTY; without even the implied   ////
+//// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ////
+//// PURPOSE. See the GNU Lesser General Public License for more  ////
+//// details.                                                     ////
+////                                                              ////
+//// You should have received a copy of the GNU Lesser General    ////
+//// Public License along with this source; if not, download it   ////
+//// from <http://www.opencores.org/lgpl.shtml>                   ////
+////                                                              ////
+//////////////////////////////////////////////////////////////////////
+//
+// $Id: regf_status.v,v 1.2 2001-11-08 23:58:10 samg Exp $ 
+//
+// CVS Revision History
+//
+// $Log: not supported by cvs2svn $
+//
 
 module regf_status (
 		clk,		// system clock
@@ -23,19 +65,18 @@ module regf_status (
                 safe_switch,	// safe to context switch or interupt;
                 stall_regf);	// stall the reg file and modules prior 
 
-parameter WIDTH = 5;
-parameter SIZE = 32;
+parameter AWIDTH = 5;
 
 input clk;
 input reset_b;
 input stall;
 input halt;
 input dest_en;
-input [WIDTH-1:0] dest_addr;
+input [AWIDTH-1:0] dest_addr;
 input wec;
-input [WIDTH-1:0] addrc;
-input [WIDTH-1:0] addra;
-input [WIDTH-1:0] addrb;
+input [AWIDTH-1:0] addrc;
+input [AWIDTH-1:0] addra;
+input [AWIDTH-1:0] addrb;
 input a_en;
 input b_en;
 input flush_pipeline;
@@ -44,9 +85,9 @@ output stall_regf;
 output safe_switch;
                
 // Internal varibles and signals
-reg [SIZE-1:0] reg_stat;	// register status field
-reg [SIZE-1:0] d_field;		// destination field 
-reg [SIZE-1:0] w_field;		// write field
+reg [(1<<AWIDTH)-1:0] reg_stat;		// register status field
+reg [(1<<AWIDTH)-1:0] d_field;		// destination field 
+reg [(1<<AWIDTH)-1:0] w_field;		// write field
 reg status_a;
 reg status_b;
 
@@ -61,13 +102,13 @@ assign dest_en_stall = (stall) ? 1'b 0 : dest_en;
 
 always @(dest_addr or dest_en_stall)
   begin
-    for (j=0;j<SIZE;j=j+1)
+    for (j=0;j<(1<<AWIDTH);j=j+1)
       d_field[j] = ((j == dest_addr) && dest_en_stall) ? 1'b 1 : 1'b 0;
   end
 
 always @(addrc or wec)
   begin
-    for (k=0;k<SIZE;k=k+1)
+    for (k=0;k<(1<<AWIDTH);k=k+1)
       w_field[k] = ((k == addrc) && wec) ? 1'b 0 : 1'b 1;
   end
 
@@ -110,11 +151,3 @@ assign stall_regf = status_a | status_b;
 
 endmodule
 
-/* 
- * $ID$
- * Module : regf_status 
- * Arthor : Sam Gladstone
- * Purpose: Scoreboard controller for reg file 
- * Issues :
- * $LOG$
- */

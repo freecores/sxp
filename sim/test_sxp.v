@@ -41,11 +41,14 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: test_sxp.v,v 1.3 2001-11-09 00:38:10 samg Exp $ 
+// $Id: test_sxp.v,v 1.4 2001-12-02 19:13:03 samg Exp $ 
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2001/11/09 00:38:10  samg
+// minor header correction
+//
 // Revision 1.2  2001/11/08 23:46:20  samg
 // integrated standard memories and added header
 //
@@ -183,7 +186,7 @@ generic_tpram #(8, 32) sp_ram (
 initial
   begin
     $dumpfile("./icarus.vcd");
-    $dumpvars(2, test_sxp);
+    $dumpvars(0, test_sxp);
   end
 
    

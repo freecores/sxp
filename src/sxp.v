@@ -41,11 +41,14 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: sxp.v,v 1.9 2001-12-14 16:53:12 samg Exp $  
+// $Id: sxp.v,v 1.10 2001-12-14 17:04:06 samg Exp $  
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.9  2001/12/14 16:53:12  samg
+// simplified regf_status interface
+//
 // Revision 1.8  2001/12/12 02:07:25  samg
 // fixed case statement, sensitivity list
 //
@@ -277,7 +280,6 @@ int_cont i_int_cont(
                 .halt(halt),                    // processor halt signal
                 .int_req(int_req),              // signal that an interupt is requested
                 .int_num(int_num),              // interupt number that is being requested
-                .safe_switch(safe_switch),      // signal that processor is safe to switch
                 .nop_detect(nop_detect),        // signal that the processor just executed a NOP instruction
  
                 .int_rdy(int_rdy),              // 1 when int req will be serviced when requested

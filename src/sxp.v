@@ -671,12 +671,15 @@ endmodule
 
 
 /*
- * $Id: sxp.v,v 1.1 2001-10-26 20:03:48 samg Exp $
+ * $Id: sxp.v,v 1.2 2001-10-26 22:07:34 samg Exp $
  * Module : sxp.v
  * Scope  : top level module
  * Author : Sam Gladstone
  * Function : SXP processor top level
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2001/10/26 20:03:48  samg
+ * 1st version
  *
-/* 
+ *
+ */ 

@@ -40,11 +40,14 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: regf_status.v,v 1.2 2001-11-08 23:58:10 samg Exp $ 
+// $Id: regf_status.v,v 1.3 2001-12-02 19:05:47 samg Exp $ 
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2001/11/08 23:58:10  samg
+// added header and modified parameter structure
+//
 //
 
 module regf_status (
@@ -121,7 +124,7 @@ always @(posedge clk or negedge reset_b)
         reg_stat <= 'b 0;
       else
         if (!halt)		// Should be only for halt signals (not stall_1_2) 
-          reg_stat <= #1 (reg_stat & w_field) | d_field;
+          reg_stat <= (reg_stat & w_field) | d_field;
   end
 
 always @(addrc or addra or wec or a_en or reg_stat)
@@ -147,7 +150,7 @@ always @(addrc or addrb or wec or b_en or reg_stat)
 // an example in Baskar's book that shows it. (I also found in the same book a statement
 // that said that assign statements could only have constant bit selects.
 
-assign stall_regf = status_a | status_b;
+assign stall_regf = status_a | status_b & !flush_pipeline;
 
 endmodule
 

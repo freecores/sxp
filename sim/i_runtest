@@ -1,0 +1,2 @@
+#! /bin/sh
+iverilog -Wall -v -otest_sxp -stest_sxp test_sxp.v

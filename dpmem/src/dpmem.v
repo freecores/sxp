@@ -98,7 +98,7 @@ always @(posedge clk or negedge reset_b)
   end
 
 // Writing data to memory
-always @(posedge clk or reset_b)
+always @(posedge clk or negedge reset_b)
   begin
     if (!reset_b)
       for (i=0;i<MEM_SIZE;i=i+1)
@@ -124,11 +124,14 @@ endtask
 endmodule
 
 /*
- *  $Id: dpmem.v,v 1.2 2001-10-28 03:18:17 samg Exp $ 
+ *  $Id: dpmem.v,v 1.3 2001-12-05 05:46:00 samg Exp $ 
  *  Module : dpmem
  *  Author : Sam Gladstone 
  *  Function : Simple behavioral module for dual port memories
  *  $Log: not supported by cvs2svn $
+ *  Revision 1.2  2001/10/28 03:18:17  samg
+ *  array range fix
+ *
  *  Revision 1.1  2001/10/26 21:49:59  samg
  *  behavioral dual port memory
  *

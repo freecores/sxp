@@ -41,11 +41,14 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: sxp.v,v 1.3 2001-11-06 20:15:28 samg Exp $  
+// $Id: sxp.v,v 1.4 2001-11-09 00:45:59 samg Exp $  
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2001/11/06 20:15:28  samg
+// Used common header
+//
 //
 
 // Remove comments to force a syncronous FF bassed reg file.
@@ -358,7 +361,7 @@ always @(src_cfg_1 or inst_vld_1 or dest_cfg_1)
   end
 
 `ifdef SYNC_REG
-sync_regf #(4,16) i_regf ( 
+sync_regf #(4,32) i_regf ( 
 	        .clk(clk),			// system clock
 		.reset_b(reset_b),		// power on reset
 		.halt(halt),			// system wide halt
@@ -373,7 +376,7 @@ sync_regf #(4,16) i_regf (
 		.qra(qra),			// Port A registered output data	
 		.qrb(qrb));			// Port B registered output data 	
 `else
-mem_regf #(4,16) i_regf ( 
+mem_regf #(4,32) i_regf ( 
 	        .clk(clk),			// system clock
 		.reset_b(reset_b),		// power on reset
 		.halt(halt),			// system wide halt
@@ -389,7 +392,7 @@ mem_regf #(4,16) i_regf (
 		.qrb(qrb));			// Port B registered output data 	
 `endif
  
-regf_status #(4,16) i_regf_status(
+regf_status #(4) i_regf_status(
                 .clk(clk),            		// system clock
                 .reset_b(reset_b),        	// power on reset
 		.stall(stall_1_2),		// stall in pipeline 1 and 2 

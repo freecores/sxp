@@ -39,7 +39,7 @@ input [31:0] db;
 output [31:0] qa;
 output [31:0] qb;
 
-reg [31:0] mem [1:MEM_SIZE];
+reg [31:0] mem [0:MEM_SIZE-1];
 
 wire [31:0] data_a;
 wire [31:0] data_b;
@@ -51,7 +51,7 @@ integer i;
 
 wire [31:0] mem_limit;
 
-assign mem_limit = MEM_SIZE;
+assign mem_limit = MEM_SIZE-1;
 
 assign qa = (oea) ? data_a : {32{1'b z}}; 
 assign qb = (oeb) ? data_b : {32{1'b z}}; 
@@ -62,14 +62,14 @@ assign data_b = (web) ? {32{1'b x}} : mem_data_b;
 // Checking address a
 always @(addra)
   begin
-    if ((addra > MEM_SIZE) && wea)
+    if ((addra > (MEM_SIZE-1)) && wea)
       $display ("address a = %d, out of range of memory limit (%d)",addra,mem_limit);
   end
 
 // Checking address b
 always @(addrb)
   begin
-    if ((addrb > MEM_SIZE) && web)
+    if ((addrb > (MEM_SIZE-1)) && web)
       $display ("address b = %d, out of range of memory limit (%d)",addrb,mem_limit);
   end
 
@@ -82,7 +82,7 @@ always @(posedge clk or negedge reset_b)
       if ((addra==addrb)&&(web==1'b1))		// You cannot write b and read a from the same address
         mem_data_a <= #3 {32{1'bx}};
       else
-        mem_data_a <= #3 mem[addra+1];
+        mem_data_a <= #3 mem[addra];
   end
 
 // Reading data from memory port b
@@ -94,39 +94,42 @@ always @(posedge clk or negedge reset_b)
       if ((addra==addrb)&&(wea==1'b1))		// You cannot write a and read b from the same address
         mem_data_b <= #3 {32{1'bx}};
       else
-        mem_data_b <= #3 mem[addrb+1];
+        mem_data_b <= #3 mem[addrb];
   end
 
 // Writing data to memory
 always @(posedge clk or reset_b)
   begin
     if (!reset_b)
-      for (i=1;i<MEM_SIZE;i=i+1)
+      for (i=0;i<MEM_SIZE;i=i+1)
         mem[i] <= {32{1'bx}};
     else
       begin
         if (wea === 1'b 1)
-          if ((addra+1)<=MEM_SIZE)
-            mem[addra+1] <= da;
+          if (addra<MEM_SIZE)
+            mem[addra] <= da;
         if (web === 1'b 1)
-          if ((addrb+1)<=MEM_SIZE)
-            mem[addrb+1] <= db;
+          if (addrb<MEM_SIZE)
+            mem[addrb] <= db;
       end
   end
 
 task mem_display;
 integer rnum;
   begin
-    for (rnum=1;rnum<=MEM_SIZE;rnum=rnum+1)
-      $display("Location %d = %h",rnum-1,mem[rnum]);
+    for (rnum=0;rnum<MEM_SIZE;rnum=rnum+1)
+      $display("Location %d = %h",rnum,mem[rnum]);
   end
 endtask    
 endmodule
 
 /*
- *  $Id: dpmem.v,v 1.1 2001-10-26 21:49:59 samg Exp $ 
+ *  $Id: dpmem.v,v 1.2 2001-10-28 03:18:17 samg Exp $ 
  *  Module : dpmem
  *  Author : Sam Gladstone 
  *  Function : Simple behavioral module for dual port memories
  *  $Log: not supported by cvs2svn $
+ *  Revision 1.1  2001/10/26 21:49:59  samg
+ *  behavioral dual port memory
+ *
  */

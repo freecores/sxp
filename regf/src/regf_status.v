@@ -40,11 +40,17 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: regf_status.v,v 1.3 2001-12-02 19:05:47 samg Exp $ 
+// $Id: regf_status.v,v 1.4 2001-12-14 16:57:32 samg Exp $ 
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.3  2001/12/02 19:05:47  samg
+// - Removed #1 delay (was originally put in for debug)
+// - Stall signal forced low during pipeline flush.
+//   (No effect on functionality but it is easier to look at
+//    the waveforms during debug)
+//
 // Revision 1.2  2001/11/08 23:58:10  samg
 // added header and modified parameter structure
 //
@@ -53,7 +59,6 @@
 module regf_status (
 		clk,		// system clock
                 reset_b,	// power on reset
-		stall,		// stall status register
 		halt,		// system stall
                 dest_en,	// instr has dest register (en scoreboarding) 
 		dest_addr,	// destination address from instruction
@@ -66,13 +71,12 @@ module regf_status (
 		flush_pipeline,	// pipeline flush (initialize status)
            
                 safe_switch,	// safe to context switch or interupt;
-                stall_regf);	// stall the reg file and modules prior 
+                conflict);	// A conflict has been found in scoreboard module 
 
-parameter AWIDTH = 5;
+parameter AWIDTH = 4;
 
 input clk;
 input reset_b;
-input stall;
 input halt;
 input dest_en;
 input [AWIDTH-1:0] dest_addr;
@@ -84,36 +88,18 @@ input a_en;
 input b_en;
 input flush_pipeline;
 
-output stall_regf;
+output conflict;
 output safe_switch;
                
 // Internal varibles and signals
 reg [(1<<AWIDTH)-1:0] reg_stat;		// register status field
-reg [(1<<AWIDTH)-1:0] d_field;		// destination field 
-reg [(1<<AWIDTH)-1:0] w_field;		// write field
+wire [(1<<AWIDTH)-1:0] d_field;		// destination field 
+wire [(1<<AWIDTH)-1:0] w_field;		// write field
 reg status_a;
 reg status_b;
 
-wire dest_en_stall;
-
-integer k;
-integer j;
- 
-assign safe_switch = !reg_stat;		// The bang ORs the contents and inverts the final single bit
-
-assign dest_en_stall = (stall) ? 1'b 0 : dest_en;
-
-always @(dest_addr or dest_en_stall)
-  begin
-    for (j=0;j<(1<<AWIDTH);j=j+1)
-      d_field[j] = ((j == dest_addr) && dest_en_stall) ? 1'b 1 : 1'b 0;
-  end
-
-always @(addrc or wec)
-  begin
-    for (k=0;k<(1<<AWIDTH);k=k+1)
-      w_field[k] = ((k == addrc) && wec) ? 1'b 0 : 1'b 1;
-  end
+assign d_field = (dest_en & (!conflict)) << dest_addr;
+assign w_field = ~(wec << addrc);
 
 always @(posedge clk or negedge reset_b)
   begin
@@ -123,13 +109,13 @@ always @(posedge clk or negedge reset_b)
       if (flush_pipeline)
         reg_stat <= 'b 0;
       else
-        if (!halt)		// Should be only for halt signals (not stall_1_2) 
+        if (!halt)		// Should be only for halt signals (not conflict) 
           reg_stat <= (reg_stat & w_field) | d_field;
   end
 
 always @(addrc or addra or wec or a_en or reg_stat)
   begin
-    if ((addrc == addra) && wec || !a_en)
+    if (((addrc == addra) && wec) || !a_en)
       status_a = 1'b 0;
     else
       status_a = reg_stat[addra];
@@ -137,20 +123,14 @@ always @(addrc or addra or wec or a_en or reg_stat)
 
 always @(addrc or addrb or wec or b_en or reg_stat)
   begin
-    if ((addrc == addrb) && wec || !b_en)
+    if (((addrc == addrb) && wec) || !b_en)
       status_b = 1'b 0;
     else
       status_b = reg_stat[addrb];
   end
 
-// assign status_a = ((addrc == addra) && wec || !a_en) ? 1'b 0 : reg_stat[addra];
-// assign status_b = ((addrc == addrb) && wec || !b_en) ? 1'b 0 : reg_stat[addrb];
-// For some reason this will not work on Icarus, need to check with other sim tools.
-// It complains that assign statements can not have variable bit select but I found
-// an example in Baskar's book that shows it. (I also found in the same book a statement
-// that said that assign statements could only have constant bit selects.
-
-assign stall_regf = status_a | status_b & !flush_pipeline;
+assign conflict = (status_a | status_b) & !flush_pipeline;
+assign safe_switch = !reg_stat;		
 
 endmodule
 

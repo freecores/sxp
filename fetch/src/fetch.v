@@ -90,7 +90,7 @@ always @(posedge clk or negedge reset_b)
       old_pc <= 'b 0;
     else
       if (set_pc)
-        old_pc <= pc_init;	// not use keeping the old one (jump is happening)
+        old_pc <= pc_init;	// no use keeping the old one (jump is happening)
       else
         if (!stall)
           old_pc <= mem_pc;
@@ -176,11 +176,14 @@ endmodule
 
 
 /*
- *  $Id: fetch.v,v 1.1 2001-10-26 21:45:45 samg Exp $ 
+ *  $Id: fetch.v,v 1.2 2001-12-12 02:02:21 samg Exp $ 
  *  Module : fetch
  *  Author : Sam Gladstone 
  *  Function : program flow control module
  * 
  *  $Log: not supported by cvs2svn $
+ *  Revision 1.1  2001/10/26 21:45:45  samg
+ *  fetch module
+ *
  * 
  */

@@ -1,8 +1,51 @@
-/*
-   SXP Processor 
-   Memory based reg file
-   Sam Gladstone
-*/
+//////////////////////////////////////////////////////////////////////
+////                                                              ////
+//// mem_regf                                                     ////
+////                                                              ////
+//// This file is part of the YOUR PROJECT NAME opencores effort. ////
+//// <http://www.opencores.org/cores/sxp/>                        ////
+////                                                              ////
+//// Module Description:                                          ////
+//// memory based reg file module                                 ////
+////                                                              ////
+//// To Do:                                                       ////
+////                                                              ////
+//// Author(s):                                                   ////
+//// - Sam Gladstone                                              ////
+////                                                              ////
+//////////////////////////////////////////////////////////////////////
+////                                                              ////
+//// Copyright (C) 2001 Sam Gladstone and OPENCORES.ORG           ////
+////                                                              ////
+//// This source file may be used and distributed without         ////
+//// restriction provided that this copyright statement is not    ////
+//// removed from the file and that any derivative work contains  ////
+//// the original copyright notice and the associated disclaimer. ////
+////                                                              ////
+//// This source file is free software; you can redistribute it   ////
+//// and/or modify it under the terms of the GNU Lesser General   ////
+//// Public License as published by the Free Software Foundation; ////
+//// either version 2.1 of the License, or (at your option) any   ////
+//// later version.                                               ////
+////                                                              ////
+//// This source is distributed in the hope that it will be       ////
+//// useful, but WITHOUT ANY WARRANTY; without even the implied   ////
+//// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ////
+//// PURPOSE. See the GNU Lesser General Public License for more  ////
+//// details.                                                     ////
+////                                                              ////
+//// You should have received a copy of the GNU Lesser General    ////
+//// Public License along with this source; if not, download it   ////
+//// from <http://www.opencores.org/lgpl.shtml>                   ////
+////                                                              ////
+//////////////////////////////////////////////////////////////////////
+//
+// $Id: mem_regf.v,v 1.2 2001-11-08 23:53:40 samg Exp $ 
+//
+// CVS Revision History
+//
+// $Log: not supported by cvs2svn $
+//
 
 module mem_regf (
 		clk,			// system clock
@@ -19,37 +62,37 @@ module mem_regf (
 		qra,			// Port A registered output data	
 		qrb);			// Port B registered output data 	
 
-parameter WIDTH = 5;
-parameter SIZE  = 32;
+parameter AWIDTH = 4;
+parameter DSIZE  = 32;
 
 input clk;
 input reset_b;
 input halt;
-input [WIDTH-1:0] addra;
+input [AWIDTH-1:0] addra;
 input a_en;
-input [WIDTH-1:0] addrb;
+input [AWIDTH-1:0] addrb;
 input b_en;
-input [WIDTH-1:0] addrc;
-input [31:0] dc;
+input [AWIDTH-1:0] addrc;
+input [DSIZE-1:0] dc;
 input wec;
 
-output [31:0] qra;
-reg [31:0] qra;
+output [DSIZE-1:0] qra;
+reg [DSIZE-1:0] qra;
 
-output [31:0] qrb;
-reg [31:0] qrb;
+output [DSIZE-1:0] qrb;
+reg [DSIZE-1:0] qrb;
 
 
 // Internal varibles and signals
 
-wire [31:0] qa;				// output of reg a from memory
-wire [31:0] qb;				// output of reg a from memory
+wire [DSIZE-1:0] qa;				// output of reg a from memory
+wire [DSIZE-1:0] qb;				// output of reg a from memory
 
 reg mem_a_enable;			// latency adjustment register for memory
 reg mem_b_enable;			// latency adjustment register for memory
 
-reg [31:0] mem_bypass_a_data;		// bypass data in case of write to same address
-reg [31:0] mem_bypass_b_data;		// bypass data in case of write to same address
+reg [DSIZE-1:0] mem_bypass_a_data;		// bypass data in case of write to same address
+reg [DSIZE-1:0] mem_bypass_b_data;		// bypass data in case of write to same address
 
 reg mem_bypass_a_enable;		// adjust for latency with bypass enable a
 reg mem_bypass_b_enable;		// adjust for letency with bypass enable b
@@ -57,11 +100,11 @@ reg mem_bypass_b_enable;		// adjust for letency with bypass enable b
 wire bypass_a;				// signal that bypass of port A needs to happen
 wire bypass_b;				// signal that bypass of port B needs to happen
 
-reg [WIDTH-1:0] r_addra;		// registered address A
-reg [WIDTH-1:0] r_addrb;		// registered address B
+reg [AWIDTH-1:0] r_addra;		// registered address A
+reg [AWIDTH-1:0] r_addrb;		// registered address B
 
-wire [WIDTH-1:0] mem_input_a;			// memory input mux result for port A
-wire [WIDTH-1:0] mem_input_b;			// memory input mux result for port B
+wire [AWIDTH-1:0] mem_input_a;			// memory input mux result for port A
+wire [AWIDTH-1:0] mem_input_b;			// memory input mux result for port B
 
 
 /* Stall technique for memories that can't stall on their own.
@@ -96,36 +139,37 @@ always @(posedge clk or negedge reset_b)
 assign mem_input_a = (halt) ? r_addra : addra;
 assign mem_input_b = (halt) ? r_addrb : addrb;
 
-dpmem #(WIDTH,SIZE) i1_dpmem (
-  	   	.clk(clk),
-		.reset_b(reset_b),
-    		.addra(mem_input_a),
-		.addrb(addrc),
-		.wea(1'b 0),
-		.web(wec),
-		.oea(1'b 1),
-		.oeb(1'b 0),
-		.da(32'b 0),
-		.db(dc),
-		
-		.qa(qa),
-		.qb());
+generic_dpram #(AWIDTH,DSIZE) i1_generic_dpram (
+  	   	.rclk(clk),
+		.rrst(!reset_b),
+		.rce(1'b 1),
+                .oe(1'b 1),
+    		.raddr(mem_input_a),
+		.do(qa),
 
-		 
-dpmem #(WIDTH,SIZE) i2_dpmem (
-  	   	.clk(clk),
-		.reset_b(reset_b),
-    		.addra(mem_input_b),
-		.addrb(addrc),
-		.wea(1'b 0),
-		.web(wec),
-		.oea(1'b 1),
-		.oeb(1'b 0),
-		.da(32'b 0),
-		.db(dc),
+  		.wclk(clk),
+		.wrst(!reset_b),
+                .wce(1'b 1),
+		.we(wec),
+		.waddr(addrc),
+		.di(dc));
 		
-		.qa(qb),
-		.qb());
+		 
+generic_dpram #(AWIDTH,DSIZE) i2_generic_dpram (
+  	   	.rclk(clk),
+		.rrst(!reset_b),
+		.rce(1'b 1),
+                .oe(1'b 1),
+    		.raddr(mem_input_b),
+		.do(qb),
+
+  		.wclk(clk),
+		.wrst(!reset_b),
+                .wce(1'b 1),
+		.we(wec),
+		.waddr(addrc),
+		.di(dc));
+		
 
 
 assign bypass_a = ((addrc == mem_input_a) && a_en && wec) ? 1'b 1 : 1'b 0;
@@ -136,8 +180,8 @@ always @(posedge clk or negedge reset_b)
   begin
     if (!reset_b)
       begin
-        mem_bypass_a_data <= 32'b 0;
-        mem_bypass_a_enable <= 1'b 0;
+        mem_bypass_a_data <= 'b 0;
+        mem_bypass_a_enable <= 'b 0;
       end
     else
       if (!halt)
@@ -152,8 +196,8 @@ always @(posedge clk or negedge reset_b)
   begin
     if (!reset_b)
       begin
-        mem_bypass_b_data <= 32'b 0;
-        mem_bypass_b_enable <= 1'b 0;
+        mem_bypass_b_data <= 'b 0;
+        mem_bypass_b_enable <= 'b 0;
       end
     else
       if (!halt) 
@@ -195,7 +239,7 @@ always @(mem_bypass_a_enable or mem_bypass_a_data or mem_a_enable or qa)
       if (mem_a_enable)
         qra = qa;
       else
-        qra = {32{1'b x}};
+        qra = {DSIZE{1'b x}};
   end
 
 
@@ -208,16 +252,7 @@ always @(mem_bypass_b_enable or mem_bypass_b_data or mem_b_enable or qb)
       if (mem_b_enable)
         qrb = qb;
       else
-        qrb = {32{1'b x}};
+        qrb = {DSIZE{1'b x}};
   end
 
 endmodule
-
-/* 
- * $ID$
- * Module : mem_regf 
- * Arthor : Sam Gladstone
- * Purpose: memory based register file 
- * Issues :
- * $LOG$
- */

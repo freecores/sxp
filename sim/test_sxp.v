@@ -2,7 +2,7 @@
 ////                                                              ////
 //// test_sxp.v                                                   ////
 ////                                                              ////
-//// This file is part of the YOUR PROJECT NAME opencores effort. ////
+//// This file is part of the SXP opencores effort.               ////
 //// <http://www.opencores.org/cores/sxp/>                        ////
 ////                                                              ////
 //// Module Description:                                          ////
@@ -41,11 +41,14 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: test_sxp.v,v 1.2 2001-11-08 23:46:20 samg Exp $ 
+// $Id: test_sxp.v,v 1.3 2001-11-09 00:38:10 samg Exp $ 
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2001/11/08 23:46:20  samg
+// integrated standard memories and added header
+//
 // Revision 1.1  2001/10/26 22:01:01  samg
 // testbench for SXP processor
 //

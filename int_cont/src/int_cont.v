@@ -45,7 +45,7 @@ reg [1:0] nop_cnt;
 reg [15:0] r_int_num;
 
 // Sets int_rdy low if we are servicing an interupt (no additional interupts will be serviced at this time)
-assign int_rdy = ~|state;
+assign int_rdy = !state;
 
 // Sets the idle signal when state is in idle mode
 assign idle = (state == 2'b 01) ? 1'b 1 : 1'b 0;
@@ -118,10 +118,13 @@ always @(int_req or safe_switch or nop_cnt or state)
 endmodule
      
 /*    
- *  $Id: int_cont.v,v 1.1 2001-10-26 21:53:55 samg Exp $ 
+ *  $Id: int_cont.v,v 1.2 2001-12-05 05:44:26 samg Exp $ 
  *  Module : int_cont
  *  Author : Sam Gladstone
  *  Function : SXP internal interupt controller
  *             (An external one might be needed as well) 
  *  $Log: not supported by cvs2svn $
+ *  Revision 1.1  2001/10/26 21:53:55  samg
+ *  interupt controller module
+ *
  */

@@ -41,11 +41,14 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: sxp.v,v 1.8 2001-12-12 02:07:25 samg Exp $  
+// $Id: sxp.v,v 1.9 2001-12-14 16:53:12 samg Exp $  
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.8  2001/12/12 02:07:25  samg
+// fixed case statement, sensitivity list
+//
 // Revision 1.7  2001/12/06 16:12:06  samg
 // minor expression rewrite in 4th stage
 //
@@ -408,7 +411,6 @@ mem_regf #(4,32) i_regf (
 regf_status #(4) i_regf_status(
                 .clk(clk),            		// system clock
                 .reset_b(reset_b),        	// power on reset
-		.stall(stall_1_2),		// stall in pipeline 1 and 2 
 		.halt(halt),			// system wide stall signal
                 .dest_en(dest_en_1),        	// instr has dest register (en scoreboarding)
                 .dest_addr(dest_addr_1),      	// destination address from instruction
@@ -420,8 +422,8 @@ regf_status #(4) i_regf_status(
 		.b_en(b_en),			// Reg B is enabled in instruction
 		.flush_pipeline(flush_pipeline),// Reinitialize status after pipeline flush
  
-                .safe_switch(safe_switch),    // safe to context switch or interupt;
-                .stall_regf(stall_1_2));    // stall the reg file and modules prior
+                .safe_switch(safe_switch),    	// safe to context switch or interupt;
+                .conflict(stall_1_2));    	// stall the reg file and modules prior
 
 
 `ifdef SYNC_REG

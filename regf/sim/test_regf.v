@@ -1,37 +1,83 @@
-/* Testbench for regfile 
-   SXP Processor
-   Sam Gladstone
-*/
+//////////////////////////////////////////////////////////////////////
+////                                                              ////
+//// regf_test                                                    ////
+////                                                              ////
+//// This file is part of the SXP opencores effort.               ////
+//// <http://www.opencores.org/cores/sxp/>                        ////
+////                                                              ////
+//// Module Description:                                          ////
+//// Testbench for regfile                                        //// 
+////                                                              ////
+//// To Do:                                                       ////
+////                                                              ////
+//// Author(s):                                                   ////
+//// - Sam Gladstone                                              ////
+////                                                              ////
+//////////////////////////////////////////////////////////////////////
+////                                                              ////
+//// Copyright (C) 2001 Sam Gladstone and OPENCORES.ORG           ////
+////                                                              ////
+//// This source file may be used and distributed without         ////
+//// restriction provided that this copyright statement is not    ////
+//// removed from the file and that any derivative work contains  ////
+//// the original copyright notice and the associated disclaimer. ////
+////                                                              ////
+//// This source file is free software; you can redistribute it   ////
+//// and/or modify it under the terms of the GNU Lesser General   ////
+//// Public License as published by the Free Software Foundation; ////
+//// either version 2.1 of the License, or (at your option) any   ////
+//// later version.                                               ////
+////                                                              ////
+//// This source is distributed in the hope that it will be       ////
+//// useful, but WITHOUT ANY WARRANTY; without even the implied   ////
+//// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ////
+//// PURPOSE. See the GNU Lesser General Public License for more  ////
+//// details.                                                     ////
+////                                                              ////
+//// You should have received a copy of the GNU Lesser General    ////
+//// Public License along with this source; if not, download it   ////
+//// from <http://www.opencores.org/lgpl.shtml>                   ////
+////                                                              ////
+//////////////////////////////////////////////////////////////////////
+//
+// $Id: test_regf.v,v 1.2 2001-11-09 00:13:06 samg Exp $ 
+//
+// CVS Revision History
+//
+// $Log: not supported by cvs2svn $
+// Revision 1.1  2001/10/29 01:10:34  samg
+// testbench for reg file
+
 `timescale 1ns / 1ns
-`include "../../dpmem/src/dpmem.v"
+`include "../../ram/generic_dpram.v"
 `include "../src/mem_regf.v"
 
 module regf_test();
 
-parameter WIDTH = 4;
-parameter SIZE = 16;
+parameter AWIDTH = 4;
+parameter DSIZE = 32;
 
 reg clk;
 reg reset_b;
 reg halt;
-reg [WIDTH-1:0] addra;
+reg [AWIDTH-1:0] addra;
 reg a_en;
-reg [WIDTH-1:0] addrb;
+reg [AWIDTH-1:0] addrb;
 reg b_en;
-reg [WIDTH-1:0] addrc;
-reg [31:0] dc;
+reg [AWIDTH-1:0] addrc;
+reg [DSIZE-1:0] dc;
 reg wec;
 
-wire [31:0] qra;
+wire [DSIZE-1:0] qra;
 wire a_en_out;
-wire [31:0] qrb;
+wire [DSIZE-1:0] qrb;
 wire b_en_out;
 
 integer i;
 integer clk_cnt;
 integer errors;
 
-mem_regf #(WIDTH,SIZE) i_regf  (
+mem_regf #(AWIDTH,DSIZE) i_regf  (
 		.clk(clk),
 		.reset_b(reset_b),
 		.halt(halt),
@@ -81,7 +127,7 @@ initial
     // Test out port C write functionality
 
     wec = 1'b 1;
-    for (i=0;i<SIZE;i=i+1)
+    for (i=0;i<(1<<AWIDTH);i=i+1)
       begin
         addrc = i;
         dc = i;
@@ -89,11 +135,11 @@ initial
       end
     wec = 1'b 0;
 
-    for (i=0;i<SIZE;i=i+1)
+    for (i=0;i<(1<<AWIDTH);i=i+1)
       begin    
         addra = i;
         a_en = 1'b 1;
-        addrb = SIZE - (i+1);
+        addrb = (1<<AWIDTH) - (i+1);
         b_en = 1'b 1;
         if (i==5)
           begin
@@ -137,13 +183,4 @@ always @(posedge clk)
       $display ("after rising edge clk # %d, regf output b = %d",clk_cnt,qrb); 
   end
 
-
 endmodule
-
-/*  $Id: test_regf.v,v 1.1 2001-10-29 01:10:34 samg Exp $ 
- *  Module : test_regf 
- *  Author : Sam Gladstone
- *  Function : testbench for reg files
- *  $Log: not supported by cvs2svn $
- */
-

@@ -41,11 +41,14 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: sxp.v,v 1.7 2001-12-06 16:12:06 samg Exp $  
+// $Id: sxp.v,v 1.8 2001-12-12 02:07:25 samg Exp $  
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.7  2001/12/06 16:12:06  samg
+// minor expression rewrite in 4th stage
+//
 // Revision 1.6  2001/12/05 18:12:08  samg
 // Rewrote verilog for write enable signals for different destinations in the last stage.
 // The code is much easier to read and more liner to follow.
@@ -674,15 +677,15 @@ always @(wb_cfg_4 or ya_4 or cvnz_a_4 or yb_4 or cvnz_b_4 or spqa_4 or ext_cvnz_
       4'b 1001 : wb_data = { {31{1'b 0}} , cvnz_b_4[1]}; 	// Store N
       4'b 1010 : wb_data = { {31{1'b 0}} , cvnz_b_4[2]}; 	// Store V
       4'b 1011 : wb_data = { {31{1'b 0}} , cvnz_b_4[3]}; 	// Store C
-      4'b 0100 : wb_data = { {31{1'b 0}} , ext_cvnz_4[0]}; 	// Store Z
-      4'b 0101 : wb_data = { {31{1'b 0}} , ext_cvnz_4[1]}; 	// Store N
-      4'b 0110 : wb_data = { {31{1'b 0}} , ext_cvnz_4[2]}; 	// Store V
-      4'b 0111 : wb_data = { {31{1'b 0}} , ext_cvnz_4[3]}; 	// Store C
+      4'b 1100 : wb_data = { {31{1'b 0}} , ext_cvnz_4[0]}; 	// Store Z
+      4'b 1101 : wb_data = { {31{1'b 0}} , ext_cvnz_4[1]}; 	// Store N
+      4'b 1110 : wb_data = { {31{1'b 0}} , ext_cvnz_4[2]}; 	// Store V
+      4'b 1111 : wb_data = { {31{1'b 0}} , ext_cvnz_4[3]}; 	// Store C
     endcase
   end
 
 // Destination handling
-always @(dest_cfg_4 or inst_vld_4 or cond_jump_4 or yb_4 or jz_4 or jal_4)
+always @(dest_cfg_4 or inst_vld_4 or cond_jump_4 or yb_4 or jz_4 or jal_4 or wb_data or pcn_4)
   begin
     if (inst_vld_4)
       case (dest_cfg_4)

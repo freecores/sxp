@@ -12,7 +12,6 @@ module int_cont (
                 halt,		// processor halt signal
                 int_req,	// signal that an interupt is requested
 		int_num,	// interupt number that is being requested
-		safe_switch,	// signal that processor is safe to switch
                 nop_detect,	// signal that the processor just executed a NOP instruction
 
                 int_rdy,	// 1 when int req will be serviced when requested 
@@ -27,7 +26,6 @@ input reset_b;
 input halt;
 input int_req;
 input [15:0] int_num;
-input safe_switch;
 input nop_detect;
 
 output int_rdy;
@@ -92,7 +90,7 @@ always @(posedge clk or negedge reset_b)
         state <= next_state;
   end
 
-always @(int_req or safe_switch or nop_cnt or state)
+always @(int_req or nop_cnt or state)
   begin
     case (state)
       // init state
@@ -118,12 +116,15 @@ always @(int_req or safe_switch or nop_cnt or state)
 endmodule
      
 /*    
- *  $Id: int_cont.v,v 1.2 2001-12-05 05:44:26 samg Exp $ 
+ *  $Id: int_cont.v,v 1.3 2001-12-14 17:04:52 samg Exp $ 
  *  Module : int_cont
  *  Author : Sam Gladstone
  *  Function : SXP internal interupt controller
  *             (An external one might be needed as well) 
  *  $Log: not supported by cvs2svn $
+ *  Revision 1.2  2001/12/05 05:44:26  samg
+ *  changed prefix from ~| to ! (same thing)
+ *
  *  Revision 1.1  2001/10/26 21:53:55  samg
  *  interupt controller module
  *

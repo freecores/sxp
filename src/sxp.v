@@ -41,11 +41,14 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: sxp.v,v 1.5 2001-12-05 05:58:10 samg Exp $  
+// $Id: sxp.v,v 1.6 2001-12-05 18:12:08 samg Exp $  
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.5  2001/12/05 05:58:10  samg
+// fixed sensitivity list error in last pipeline stage
+//
 // Revision 1.4  2001/11/09 00:45:59  samg
 // integrated common rams into processor
 //
@@ -144,7 +147,7 @@ reg [31:0] wb_data;		// write back registered data
 
 
 // Fetch interface wires
-wire  set_pc;
+reg  set_pc;
 wire flush_pipeline;		// signal to invalidate all pipelines
 wire stall_fetch;		// stall for fetch module
 
@@ -223,7 +226,6 @@ reg  jal_3;			// jump and link from pipeline 3
 
 // Pipeline #4 (WB and destination logic) wires and regs
 wire stall_4;			// stall 4th pipeline
-reg  set_pc_4;			// preliminary signal to set pc in pipeline 4
 reg  inst_vld_4;		// instruction valid signal from pipeline 4
 reg  [1:0] dest_cfg_4;		// destination configuration from pipeline 4
 reg  [RF_WIDTH-1:0] dest_addr_4;// destination address for RF write from pipeline 4
@@ -675,36 +677,43 @@ always @(wb_cfg_4 or ya_4 or cvnz_a_4 or yb_4 or cvnz_b_4 or spqa_4 or ext_cvnz_
     endcase
   end
 
-// Destination handling only write enable is instruction is valid
-always @(dest_cfg_4 or inst_vld_4 or cond_jump_4 or yb_4[0] or jz_4 or set_pc or jal_4)
+// Destination handling
+always @(dest_cfg_4 or inst_vld_4 or cond_jump_4 or yb_4 or jz_4 or jal_4)
   begin
     if (inst_vld_4)
       case (dest_cfg_4)
-        2'b 00 : wec = 1'b 1; 
+        2'b 00 : {wec, set_pc, spw_we, ext_we} = 4'b 1000;
         2'b 01 : begin
-                   set_pc_4 = (cond_jump_4) ? (yb_4[0]^jz_4) : 1'b 1;
-                   wec = jal_4 & set_pc;	// Must be set_pc not set_pc_4
+                   {spw_we, ext_we} = 2'b 00;
+                   if (wb_data == pcn_4)
+                     {wec, set_pc} = 2'b 00; 	// Don't allow simple jumps to the next instruction, wastes time
+                   else
+                     if (cond_jump_4)
+                       if (yb_4[0]^jz_4)	// Conditional jump check (will not Link if not jump taken)
+                         begin
+                           wec = jal_4;
+                           set_pc = 1'b 1;
+                         end
+                       else			// Cond jump not taken (nothing done)
+                         begin
+                           wec = 1'b 0;
+                           set_pc = 1'b 0;
+                         end
+                     else 			// Typical JAL type instruction
+                       begin
+                         wec = jal_4;
+                         set_pc = 1'b 1;
+                       end
                  end
-        2'b 10 : spw_we = 1'b 1;
-        2'b 11 : ext_we = 1'b 1;
-        default: begin
-                   wec = 1'b 0;
-                   set_pc_4 = 1'b 0;
-                   spw_we = 1'b 0;
-                   ext_we = 1'b 0;
-                 end
+        2'b 10 : {wec, set_pc, spw_we, ext_we} = 4'b 0010;
+        2'b 11 : {wec, set_pc, spw_we, ext_we} = 4'b 0001;
+        default: {wec, set_pc, spw_we, ext_we} = 4'b 0000;
       endcase
     else 
-      begin
-        wec = 1'b 0;
-        set_pc_4 = 1'b 0;
-        spw_we = 1'b 0;
-        ext_we = 1'b 0;
-      end
+      {wec, set_pc, spw_we, ext_we} = 4'b 0000;
   end
 
-  assign regc_data = (jal_4 && set_pc) ? pcn_4 : wb_data;	// data to write to reg port C
-  assign set_pc = (wb_data == pcn_4) ? 1'b 0 : set_pc_4;	// speed feature, don't jump 0
+  assign regc_data = (wec && set_pc) ? pcn_4 : wb_data;		// data to write to reg port C
   assign addrc_wb = dest_addr_4;				// reg file write back address 
 
   assign nop_detect = inst_vld_4 & ~(wec | set_pc | spw_we | ext_we);	// 1 when no operation is being done

@@ -1,9 +1,54 @@
-/* SXP (Simple Extensible Pipeline) Core
- *
- * Architecture - Sam Gladstone
- *
- */
+//////////////////////////////////////////////////////////////////////
+////                                                              ////
+//// SXP (Simple eXtensible Pipelined) Processor                  ////
+////                                                              ////
+//// This file is part of the SXP opencores effort.               ////
+//// <http://www.opencores.org/cores/sxp/>                        ////
+////                                                              ////
+//// Module Description:                                          ////
+//// SXP (Simple Extensible Pipeline) Core top level              ////
+////                                                              ////
+//// To Do:                                                       ////
+//// - Instruction level traps                                    ////
+////                                                              ////
+//// Author(s):                                                   ////
+//// - Sam Gladstone                                              ////
+////                                                              ////
+//////////////////////////////////////////////////////////////////////
+////                                                              ////
+//// Copyright (C) 2001 YOUR NAME HERE and OPENCORES.ORG          ////
+////                                                              ////
+//// This source file may be used and distributed without         ////
+//// restriction provided that this copyright statement is not    ////
+//// removed from the file and that any derivative work contains  ////
+//// the original copyright notice and the associated disclaimer. ////
+////                                                              ////
+//// This source file is free software; you can redistribute it   ////
+//// and/or modify it under the terms of the GNU Lesser General   ////
+//// Public License as published by the Free Software Foundation; ////
+//// either version 2.1 of the License, or (at your option) any   ////
+//// later version.                                               ////
+////                                                              ////
+//// This source is distributed in the hope that it will be       ////
+//// useful, but WITHOUT ANY WARRANTY; without even the implied   ////
+//// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ////
+//// PURPOSE. See the GNU Lesser General Public License for more  ////
+//// details.                                                     ////
+////                                                              ////
+//// You should have received a copy of the GNU Lesser General    ////
+//// Public License along with this source; if not, download it   ////
+//// from <http://www.opencores.org/lgpl.shtml>                   ////
+////                                                              ////
+//////////////////////////////////////////////////////////////////////
+//
+// $Id: sxp.v,v 1.3 2001-11-06 20:15:28 samg Exp $  
+//
+// CVS Revision History
+//
+// $Log: not supported by cvs2svn $
+//
 
+// Remove comments to force a syncronous FF bassed reg file.
 // `define SYNC_REG
 
 module sxp 
@@ -669,17 +714,3 @@ always @(dest_cfg_4 or inst_vld_4 or cond_jump_4 or yb_4[0] or jz_4 or set_pc)
 
 endmodule
 
-
-/*
- * $Id: sxp.v,v 1.2 2001-10-26 22:07:34 samg Exp $
- * Module : sxp.v
- * Scope  : top level module
- * Author : Sam Gladstone
- * Function : SXP processor top level
- *
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2001/10/26 20:03:48  samg
- * 1st version
- *
- *
- */ 

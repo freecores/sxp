@@ -41,11 +41,15 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: sxp.v,v 1.6 2001-12-05 18:12:08 samg Exp $  
+// $Id: sxp.v,v 1.7 2001-12-06 16:12:06 samg Exp $  
 //
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.6  2001/12/05 18:12:08  samg
+// Rewrote verilog for write enable signals for different destinations in the last stage.
+// The code is much easier to read and more liner to follow.
+//
 // Revision 1.5  2001/12/05 05:58:10  samg
 // fixed sensitivity list error in last pipeline stage
 //
@@ -695,10 +699,7 @@ always @(dest_cfg_4 or inst_vld_4 or cond_jump_4 or yb_4 or jz_4 or jal_4)
                            set_pc = 1'b 1;
                          end
                        else			// Cond jump not taken (nothing done)
-                         begin
-                           wec = 1'b 0;
-                           set_pc = 1'b 0;
-                         end
+                         {wec, set_pc} = 2'b 00; 
                      else 			// Typical JAL type instruction
                        begin
                          wec = jal_4;
@@ -713,7 +714,7 @@ always @(dest_cfg_4 or inst_vld_4 or cond_jump_4 or yb_4 or jz_4 or jal_4)
       {wec, set_pc, spw_we, ext_we} = 4'b 0000;
   end
 
-  assign regc_data = (wec && set_pc) ? pcn_4 : wb_data;		// data to write to reg port C
+  assign regc_data = (wec && set_pc) ? pcn_4 : wb_data;		// data to write to reg port C (JAL or Data)
   assign addrc_wb = dest_addr_4;				// reg file write back address 
 
   assign nop_detect = inst_vld_4 & ~(wec | set_pc | spw_we | ext_we);	// 1 when no operation is being done

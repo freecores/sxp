@@ -1,9 +1,60 @@
-/* Testbench module for SXP processor
-   Sam Gladstone
-*/
+//////////////////////////////////////////////////////////////////////
+////                                                              ////
+//// test_sxp.v                                                   ////
+////                                                              ////
+//// This file is part of the YOUR PROJECT NAME opencores effort. ////
+//// <http://www.opencores.org/cores/sxp/>                        ////
+////                                                              ////
+//// Module Description:                                          ////
+//// Testbench for SXP processor                                  ////
+////                                                              ////
+//// To Do:                                                       ////
+//// Improve flexability and capabilities                         ////
+////                                                              ////
+//// Author(s):                                                   ////
+//// - Sam Gladstone                                              ////
+////                                                              ////
+//////////////////////////////////////////////////////////////////////
+////                                                              ////
+//// Copyright (C) 2001 Sam Gladstone and OPENCORES.ORG           ////
+////                                                              ////
+//// This source file may be used and distributed without         ////
+//// restriction provided that this copyright statement is not    ////
+//// removed from the file and that any derivative work contains  ////
+//// the original copyright notice and the associated disclaimer. ////
+////                                                              ////
+//// This source file is free software; you can redistribute it   ////
+//// and/or modify it under the terms of the GNU Lesser General   ////
+//// Public License as published by the Free Software Foundation; ////
+//// either version 2.1 of the License, or (at your option) any   ////
+//// later version.                                               ////
+////                                                              ////
+//// This source is distributed in the hope that it will be       ////
+//// useful, but WITHOUT ANY WARRANTY; without even the implied   ////
+//// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      ////
+//// PURPOSE. See the GNU Lesser General Public License for more  ////
+//// details.                                                     ////
+////                                                              ////
+//// You should have received a copy of the GNU Lesser General    ////
+//// Public License along with this source; if not, download it   ////
+//// from <http://www.opencores.org/lgpl.shtml>                   ////
+////                                                              ////
+//////////////////////////////////////////////////////////////////////
+//
+// $Id: test_sxp.v,v 1.2 2001-11-08 23:46:20 samg Exp $ 
+//
+// CVS Revision History
+//
+// $Log: not supported by cvs2svn $
+// Revision 1.1  2001/10/26 22:01:01  samg
+// testbench for SXP processor
+//
 
 `timescale 1ns / 1ps
-`include "../dpmem/src/dpmem.v"
+`include "../ram/generic_spram.v"
+`include "../ram/generic_dpram.v"
+`include "../ram/generic_tpram.v"
+// `include "../dpmem/src/dpmem.v"
 `include "../fetch/src/fetch.v"
 `include "../int_cont/src/int_cont.v"
 `include "../regf/src/mem_regf.v"
@@ -96,35 +147,36 @@ sxp #(RF_WIDTH,RF_SIZE) i_sxp
 		 .mem_pc(mem_pc));		// Program Counter Address
 		  
 
-dpmem #(32, 64) inst_memory (
+generic_spram #(8, 32) inst_ram (
                   .clk(clk),
-		  .reset_b(reset_b),
-		  .addra(mem_pc),	// address a port
-		  .addrb(32'b 0),	// address b port
-	          .wea(1'b 0),		// write enable a
-	          .web(1'b 0),		// write enable b
-	          .oea(1'b 1),		// output enable a
-	          .oeb(1'b 0),		// output enable b
-		  .da(32'b 0),		// data input a
-		  .db(32'b 0),		// data input b
+		  .rst(!reset_b),
+		  .ce(1'b 1),
+	          .we(1'b 0),		// write enable
+	          .oe(1'b 1),		// output enable 
+		  .addr(mem_pc[7:0]),	// address 
+		  .di(32'b 0),		// data input
 		
-		  .qa(mem_inst),		// data output a
-		  .qb());			// data output b
+		  .do(mem_inst));	// data output
 
-dpmem #(32, 64) sp_memory (
-                  .clk(clk),
-		  .reset_b(reset_b),
-		  .addra(spl_addr),		// address a port
-		  .addrb(spw_addr),		// address b port
-	          .wea(1'b 0),			// write enable a
-	          .web(spw_we),			// write enable b
-	          .oea(1'b 1),			// output enable a
-	          .oeb(1'b 0),			// output enable b
-		  .da(32'b 0),			// data input a
-		  .db(spw_data),		// data input b
-		
-		  .qa(spqa),			// data output a
-		  .qb());			// data output b
+generic_tpram #(8, 32) sp_ram (
+                  .clk_a(clk),
+		  .rst_a(reset_b),
+		  .ce_a(1'b 1),
+	          .we_a(1'b 0),			// write enable a
+	          .oe_a(1'b 1),			// output enable a
+		  .addr_a(spl_addr[7:0]),	// address a port
+		  .di_a(32'b 0),		// data input a
+		  .do_a(spqa),			// data output a
+		 
+
+                  .clk_b(clk),
+		  .rst_b(reset_b),
+		  .ce_b(1'b 1),
+	          .we_b(spw_we),		// write enable b
+	          .oe_b(1'b 0),			// output enable b
+		  .addr_b(spw_addr[7:0]),	// address b port
+		  .di_b(spw_data),		// data input b
+		  .do_b());			// data output b
 initial
   begin
     $dumpfile("./icarus.vcd");
@@ -243,7 +295,7 @@ always @(negedge clk)
         `ifdef SYNC_REG
         i_sxp.i_regf.reg_display;
         `else
-        i_sxp.i_regf.i1_dpmem.mem_display;
+        i_sxp.i_regf.i1_generic_dpram.print_ram(0,15);
         `endif
         $display ("-----------------------------");
       end
@@ -252,15 +304,7 @@ always @(negedge clk)
 task program_load;
 integer prg_load_ptr;
   begin
-    $readmemh ("test.sxp",inst_memory.mem);
+    $readmemh ("test.sxp",inst_ram.mem);
   end
 endtask
 endmodule
-
-/*
- *  $Id: test_sxp.v,v 1.1 2001-10-26 22:01:01 samg Exp $ 
- *  Module : test_sxp
- *  Author : Sam Gladstone 
- *  Function : Testbench for SXP processor 
- *  $Log: not supported by cvs2svn $
- */
